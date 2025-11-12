@@ -1,0 +1,5 @@
+.env
+__pycache__/
+logging/
+tools/sqlacodegen-data/models*.py
+tools/sqlacodegen-backup/models*.py

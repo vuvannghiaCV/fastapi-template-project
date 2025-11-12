@@ -1,0 +1,46 @@
+services:
+  database:
+    build: "./database"
+    env_file:
+      - .env
+    ports:
+      - "${MYSQL_PORT}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+    volumes:
+      # - "./database:/var/lib/mysql"
+      - "./database/init:/docker-entrypoint-initdb.d"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 5
+
+
+
+  backend:
+    build: "./backend"
+    env_file:
+      - .env
+    depends_on:
+      database:
+        condition: service_healthy
+
+    volumes:
+      - "./backend:/usr/src/backend"
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin
+  #   depends_on:
+  #     database:
+  #       condition: service_healthy
+  #   ports:
+  #     - "8080:80"
+  #   environment:
+  #     PMA_HOST: database
+  #     PMA_PORT: 3306
+  #     MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+  #     PMA_USER: root
+  #     PMA_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+  #   restart: always
